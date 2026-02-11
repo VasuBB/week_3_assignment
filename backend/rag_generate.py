@@ -111,12 +111,13 @@ class RAGGenerator:
             retrieval_pipeline: Optional pre-initialized retrieval pipeline
         """
 
-        self.config = config or GenerationConfig()
+        self.config = config or GenerationConfig
         self.retrieval = retrieval_pipeline or RetrievalPipeline()
         self.openrouter_api_key = self.config.openrouter_api_key or os.getenv("OPENROUTER_API_KEY")
         if not self.openrouter_api_key:
-            raise ValueError("OPENROUTER_API_KEY not set")
+               raise ValueError("OPENROUTER_API_KEY not set")
         self.openrouter_base_url = "https://openrouter.ai/api/v1"
+        pass
     
     def refine_query(self, query: str) -> str:
         """
@@ -175,6 +176,7 @@ class RAGGenerator:
         response_json = response.json()
         refined = response_json["choices"][0]["message"]["content"].strip()
         return refined
+        pass
     
     def _format_context(self, results: list[RetrievalResult]) -> str:
         """
@@ -219,6 +221,9 @@ class RAGGenerator:
             formatted_chunk.append(formatted.strip())
 
         return "\n\n".join(formatted_chunk)
+
+
+        pass
     
     def _build_sources_metadata(self, results: list[RetrievalResult]) -> list[dict]:
         """
@@ -266,6 +271,8 @@ class RAGGenerator:
                     "abstract_url": result.abstract_url,
                 }
         return list(seen.values())
+
+        pass
     
     def _call_llm(self, query: str, context: str) -> str:
         """
@@ -341,6 +348,7 @@ class RAGGenerator:
         response_json = response.json()
         answer = response_json["choices"][0]["message"]["content"]
         return answer
+        pass
     
     def generate(self, query: str, top_k: Optional[int] = None, return_sources: bool = True) -> dict:
         """
@@ -399,6 +407,7 @@ class RAGGenerator:
             "answer": answer,
             "sources": self._build_sources_metadata(results) if return_sources else []
         }
+        pass
 
 
 # =============================================================================
