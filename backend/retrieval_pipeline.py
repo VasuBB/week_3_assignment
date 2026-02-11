@@ -284,14 +284,27 @@ class RetrievalPipeline:
             model=config.embedding_model
         )
         
-        with open(config.chunks_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            # Handle both direct array and wrapped object formats
-            if isinstance(data, dict) and "chunks" in data:
-                self.chunks = data["chunks"]
-            else:
-                self.chunks = data
-        print(f"Loaded {len(self.chunks)} chunks")
+        # Load chunks from file or fetch from Qdrant if file not available
+        if config.chunks_path and os.path.exists(config.chunks_path):
+            with open(config.chunks_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                # Handle both direct array and wrapped object formats
+                if isinstance(data, dict) and "chunks" in data:
+                    self.chunks = data["chunks"]
+                else:
+                    self.chunks = data
+            print(f"Loaded {len(self.chunks)} chunks from file")
+        else:
+            # Fallback: fetch all points from Qdrant for BM25 indexing
+            print("Local chunks file not found, fetching from Qdrant...")
+            scroll_result = self.qdrant.scroll(
+                collection_name=COLLECTION_NAME,
+                limit=20000,
+                with_payload=True,
+                with_vectors=False
+            )
+            self.chunks = [point.payload for point in scroll_result[0]]
+            print(f"Loaded {len(self.chunks)} chunks from Qdrant")
         
         self.bm25_index = BM25Index(self.chunks)
     
