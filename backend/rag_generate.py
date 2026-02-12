@@ -271,8 +271,6 @@ class RAGGenerator:
                     "abstract_url": result.abstract_url,
                 }
         return list(seen.values())
-
-        pass
     
     def _call_llm(self, query: str, context: str) -> str:
         """
